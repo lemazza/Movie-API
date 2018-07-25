@@ -1,0 +1,12 @@
+{
+  "name": "movie-api",
+  "version": "1.0.0",
+  "description": "serves movies and associated words for guessing game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Louis Mazza",
+  "license": "ISC"
+}
