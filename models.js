@@ -13,7 +13,7 @@ const movieTitleSchema = mongoose.Schema({
   title: {type: String, required: true},
   year: {type: Number},
   guesses: [{
-    guessWord: {type: String, required: true},
+    clueWord: {type: String, required: true},
     count: {type: Number}
   }],
 })
@@ -26,3 +26,29 @@ userSchema.methods.serialize = function() {
     guesses: this.guesses,
   }
 }
+
+/**
+  * Clues
+  */
+
+const clueSchema = mongoose.Schema({
+  word: {type: String, required: true, unique: true},
+  guesses: [{
+    movie: {
+      type: ObjectId,
+      ref: 'Movie'
+    },
+    count: {type: Number},
+  }]
+})
+
+
+
+
+
+
+
+const Movie = mongoose.model('Movie', movieTitleSchema);
+const Clue = mongoose.model('Clue', clueSchema);
+
+module.exports = {Movie, Clue};
