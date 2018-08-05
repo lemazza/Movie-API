@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-//const {Game, User} = require('./models');
+const {Movie, Clue} = require('./models');
 const config = require('./config');
 
 
@@ -10,15 +10,15 @@ const { DATABASE_URL, PORT } = require('./config');
 
 
 const app = express();
+var http = require('http').Server(app);
 app.use(morgan('common'));
 app.use(bodyParser.json());
 
 
 
-
-
-
-
+app.get('/', function (req, res, next) {
+  res.send('Hellloooo from Movie Game API server');
+});
 
 
 function runServer(databaseUrl, port = PORT) {
