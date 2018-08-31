@@ -11,14 +11,14 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const movieTitleSchema = mongoose.Schema({
   title: {type: String, required: true},
-  year: {type: Number},
+  year: {type: Number, required: true},
   guesses: [{
     clueWord: {type: String, required: true},
     count: {type: Number}
   }],
 })
 
-userSchema.methods.serialize = function() {
+movieTitleSchema.methods.serialize = function() {
   return {
     id: this._id,
     title: this.title,
@@ -30,6 +30,9 @@ userSchema.methods.serialize = function() {
 /**
   * Clues
   */
+
+//need to POPULATE clues you want to return movie info from
+//include that in serialize??
 
 const clueSchema = mongoose.Schema({
   word: {type: String, required: true, unique: true},
