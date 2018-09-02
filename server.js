@@ -133,17 +133,26 @@ app.get('/clue/:guessWord', (req, res) =>{
 
 //update guessword with movie(and update movie with guess word)
 app.get('/clue/:guessWord', (req, res)=> {
-  let {movieTitle} = req.body;
+  const {movieTitle} = req.body;
+  const {guessWord} = req.params;
   Clue
   .findOneAndUpdate(
-    {word: req.params.guessWord, guesses.movie.title: movieTitle},
+    {word: guessWord, guesses.movie.title: movieTitle},
     {$inc: {"guesses.$.count": 1}},
     {upsert: true}
 
     //if guess exists increment, if not add to array with count=1
   )
   .then(clue => {
-      res.status(200).json(clue);
+    Movie
+    .findOneAndUpdate(
+      {title: movieTitle, guesses.clueWord: guessWord},
+      {$inc: {guesses.$.count: 1}},
+      {upsert: true}
+    )
+    .then(movie => {
+      res.status(200).json({clue, movie});
+    }) 
   })
   .catch(err=> {
     res.status(500).json({error: 'this is going to fuck up for a bit', status: err})
