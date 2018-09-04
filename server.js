@@ -37,6 +37,25 @@ app.get('/movie/:id', (req, res)=> {
   })
 })
 
+//deliver random movie
+app.get('/movie/random', (req, res) => {
+  let totalResults, randomNum;
+  Movie
+  .find({})
+  .then(movies => {
+    totalResults = Object.keys(movies).length;
+    randomNum = Math.floor(Math.random() * totalResults);
+    return movies[randomNum];
+  })
+  .then(movie => {
+    res.json(movie.serialize())
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong with the randomizer, this has to be our fault', status: err });
+  });
+})
+
 app.get('movie/:title', (req, res)=>{
   Movie
   .findOne({title: req.params.title})
