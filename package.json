@@ -14,10 +14,10 @@
   "author": "Louis Mazza",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^5.2.6",
-    "morgan": "^1.9.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
-    "nodemon": "^1.14.12"
+    "mongoose": "^5.2.6",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.18.4"
   }
 }

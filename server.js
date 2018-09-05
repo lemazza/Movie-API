@@ -19,26 +19,14 @@ app.use(bodyParser.json());
 app.get('/', function (req, res, next) {
   res.send('Hellloooo from Movie Game API server');
 });
-
 /*
  *
  * MOVIES
  *
  */
 
-app.get('/movie/:id', (req, res)=> {
-  Movie
-  .findById(req.params.id)
-  .then(movie => {
-    res.status(200).json(movie.serialize());
-  })
-  .catch(err => {
-    res.status(500).json({error: 'something went wrong on get', status: err }))
-  })
-})
-
-//deliver random movie
-app.get('/movie/random', (req, res) => {
+ //deliver random movie
+app.get('/movies/random', (req, res) => {
   let totalResults, randomNum;
   Movie
   .find({})
@@ -56,19 +44,33 @@ app.get('/movie/random', (req, res) => {
   });
 })
 
-app.get('movie/:title', (req, res)=>{
+app.get('/movies/:id', (req, res)=> {
+  Movie
+  .findById(req.params.id)
+  .then(movie => {
+    res.status(200).json(movie.serialize());
+  })
+  .catch(err => {
+    res.status(500).json({error: 'something went wrong on get', status: err })
+  })
+})
+
+
+
+app.get('movies/title/:title', (req, res)=>{
+  conole.log(req.params.title);
   Movie
   .findOne({title: req.params.title})
   .then(movie => {
     res.status(200).json(movie.serialize());
   })
-  catch(err => {
-    res.status(500).json({error: 'something went wrong on get', status: err }))
+  .catch(err => {
+    res.status(500).json({error: 'something went wrong on get', status: err })
   })
 })
 
-app.put('/movie/:id', (req, res) => {
-  {guess} = req.body
+app.put('/movies/:id', (req, res) => {
+  const {guess} = req.body
 
   Movie
   .findByIdAndUpdate(
@@ -77,7 +79,7 @@ app.put('/movie/:id', (req, res) => {
   )
 })
 
-app.post('/movie', (req, res) => {
+app.post('/movies', (req, res) => {
   //check to make sure the required fields are in the body
   const requiredFields = ['title', 'year', 'guesses'];
   for (let i = 0; i < requiredFields.length; i++) {
@@ -156,7 +158,7 @@ app.get('/clue/:guessWord', (req, res)=> {
   const {guessWord} = req.params;
   Clue
   .findOneAndUpdate(
-    {word: guessWord, guesses.movie.title: movieTitle},
+    {word: guessWord, "guesses.movie.title": movieTitle},
     {$inc: {"guesses.$.count": 1}},
     {upsert: true}
 
@@ -165,8 +167,8 @@ app.get('/clue/:guessWord', (req, res)=> {
   .then(clue => {
     Movie
     .findOneAndUpdate(
-      {title: movieTitle, guesses.clueWord: guessWord},
-      {$inc: {guesses.$.count: 1}},
+      {title: movieTitle, "guesses.clueWord": guessWord},
+      {$inc: {"guesses.$.count": 1}},
       {upsert: true}
     )
     .then(movie => {
