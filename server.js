@@ -19,10 +19,9 @@ app.use(bodyParser.json());
 app.get('/', function (req, res, next) {
   res.send('Hellloooo from Movie Game API server');
 });
+
 /*
- *
  * MOVIES
- *
  */
 
  //deliver random movie
@@ -69,15 +68,29 @@ app.get('movies/title/:title', (req, res)=>{
   })
 })
 
-app.put('/movies/:id', (req, res) => {
-  const {guess} = req.body
+app.put('/movies/:movieId', (req, res) => {
+  const {clueWord} = req.body;
+  const {movieId} = req.params;
 
+  //add guess to movie
   Movie
   .findByIdAndUpdate(
-    req.params.id,
-
+    //if guess exists increment, if not add to array with count=1
+    movieId,
+    {$inc: {"guesses.[clueWord].count": 1}},
+    {upsert: true}
   )
+  .then(movie => {
+    //add movie to clueWord or create clueWord with movie
+    Clue
+    .findOneAndUpdate(
+      {word: guessWord, "guesses.movie.id": req.params.id},
+      {$inc: {"guesses.$.count": 1}},
+      {upsert: true}
+    )
+  })
 })
+  
 
 app.post('/movies', (req, res) => {
   //check to make sure the required fields are in the body
@@ -99,6 +112,7 @@ app.post('/movies', (req, res) => {
     guesses
   })
   .then(movie => {
+    //should add any guesses to Clue collection
     res.status(201).json(movie.serialize())
   })
   .catch(err => {
@@ -107,13 +121,11 @@ app.post('/movies', (req, res) => {
 })
 
 /*
- *
  * CLUES
- *
  */
 
 //deliver random guess word
-app.get('/clue/random', (req, res) => {
+app.get('/clues/random', (req, res) => {
   let totalResults, randomNum;
   Clue
   .find({})
@@ -132,7 +144,7 @@ app.get('/clue/random', (req, res) => {
 })
 
 //retrieve guess word
-app.get('/clue/:guessWord', (req, res) =>{
+app.get('/clues/:guessWord', (req, res) =>{
   //need to perform some regex on guessword - no spaces, numbers, symbols, convert to all lowercase
 
   Clue
@@ -153,21 +165,25 @@ app.get('/clue/:guessWord', (req, res) =>{
 
 
 //update guessword with movie(and update movie with guess word)
-app.get('/clue/:guessWord', (req, res)=> {
-  const {movieTitle} = req.body;
+app.put('/clues/:guessWord', (req, res)=> {
+  const {movieId} = req.body;
   const {guessWord} = req.params;
+  console.log(movieId, guessWord);
   Clue
   .findOneAndUpdate(
-    {word: guessWord, "guesses.movie.title": movieTitle},
-    {$inc: {"guesses.$.count": 1}},
-    {upsert: true}
-
     //if guess exists increment, if not add to array with count=1
+    {word: guessWord},
+    {
+      $inc: {"guesses.[movieId].count": 1},
+      $push: {"guesses": {movie: movieId, count:1}}
+    },
+    {upsert: true}
   )
   .then(clue => {
+    console.log('CLUE', clue);
     Movie
     .findOneAndUpdate(
-      {title: movieTitle, "guesses.clueWord": guessWord},
+      {title: movieTitle, "guesses.id": clue.id},
       {$inc: {"guesses.$.count": 1}},
       {upsert: true}
     )
@@ -186,10 +202,8 @@ app.get('/clue/:guessWord', (req, res)=> {
 
 
  /*
- *
- * RUNSERVER
- *
- */
+  * RUNSERVER
+  */
 
 function runServer(databaseUrl, port = PORT) {
   return new Promise((resolve, reject) => {
